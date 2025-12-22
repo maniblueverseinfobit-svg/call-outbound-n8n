@@ -1,0 +1,460 @@
+{
+  "name": "call outbound",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1200,
+        -992
+      ],
+      "id": "ec96d944-82e5-4ab9-9a51-c63064858987",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fdbf7f90-fd1f-4fd1-aa0e-3aea27d1a379",
+              "name": "ASSISTANT ID",
+              "value": "6b548f5a-1552-4544-a4c3-835305c02c1e",
+              "type": "string"
+            },
+            {
+              "id": "d8dc683b-3d60-418c-97ac-1449b96e3aa9",
+              "name": "PHONE NUMBER ID",
+              "value": "96ea9b27-8eff-4913-b941-93601bbe657b",
+              "type": "string"
+            },
+            {
+              "id": "b4c86ad2-a17a-40ed-9894-d2c4d6578ebc",
+              "name": "phone_e164",
+              "value": "=+918667872035",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -592,
+        -992
+      ],
+      "id": "95996f10-60eb-4ae0-9610-8bf9550cbab7",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Lak3YkwdXk3szuxORsotRrqrTY7pqBXbMZsu43N6J2c",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Lak3YkwdXk3szuxORsotRrqrTY7pqBXbMZsu43N6J2c/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1040,
+        -992
+      ],
+      "id": "83e0fc83-c3f4-4727-b2d1-0ed3e7f4064b",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "IT15dK26vKqnoELe",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.vapi.ai/assistant/{{ $('Edit Fields').item.json['ASSISTANT ID'] }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -48,
+        -992
+      ],
+      "id": "a17256d2-6990-4c28-9960-c1afc7f8d44f",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "XJ3dvbL0V5yq8B5E",
+          "name": "Header Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        592,
+        -992
+      ],
+      "id": "c9079281-7108-449b-8e75-eec64f446091",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1152,
+        -640
+      ],
+      "id": "0d9c1ca9-0160-49fb-a43e-c487ba3d64ea",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -656,
+        -624
+      ],
+      "id": "c4cbd558-de86-4c24-bea4-8b6b9422648c",
+      "name": "Wait",
+      "webhookId": "fe7fffdf-23cf-4b56-a205-48eeb0333a86"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.vapi.ai/call",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"phoneNumberId\": \"{{ $('Edit Fields').item.json['PHONE NUMBER ID'] }}\",\n  \"assistantId\": \"{{ $('Limit').item.json.id }}\",\n  \"customer\": {\n    \"number\": \"{{ $json['Phone number'] }}\"\n  },\n  \"assistantOverrides\": {\n    \"variableValues\": {\n      \"name\": \"{{ $json.Name }}\"\n    }\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -192,
+        -624
+      ],
+      "id": "1ed65b1b-7d41-4849-aa8b-707b71438bb2",
+      "name": "make call",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "8dvqmO1m5Qbs8FfI",
+          "name": "Header Auth account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.vapi.ai/call/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        48,
+        -624
+      ],
+      "id": "a1750457-9d95-4aad-b253-8fdd3b9dc597",
+      "name": "Get call summary",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "XJ3dvbL0V5yq8B5E",
+          "name": "Header Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1f4e17fe-d6df-4d90-a30d-6fef0e08d71a",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        400,
+        -624
+      ],
+      "id": "8abe766c-2e3d-42fe-9998-cc9f601ae6e9",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        768,
+        -608
+      ],
+      "id": "881eb159-cab9-4e18-bced-8f8b493e2d1e",
+      "name": "Wait1",
+      "webhookId": "f666b80b-eec1-4cb0-b5d9-104a05570f2f"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5.1",
+          "mode": "list",
+          "cachedResultName": "GPT-5.1"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "You are a professional AI voice assistant calling on behalf of Bluverse Infobit Pvt. Ltd.\\n\\nYour primary objective is to collect mandatory customer details and book an appointment for a business loan discussion.\\n\\nYou MUST collect ALL of the following details before confirming an appointment:\\n1. Customer full name\\n2. Customer location (city and state)\\n3. Valid phone number\\n4. Appointment date\\n5. Appointment time\\n\\nRules you must follow:\\n- Do NOT skip any required field.\\n- If the customer provides incomplete or unclear information, politely ask again.\\n- Do NOT confirm the appointment unless all details are collected.\\n- Always repeat and confirm the details at the end.\\n- Maintain a professional, polite, and trustworthy tone.\\n- If the customer is busy, ask for a callback time.\\n- Do not ask for sensitive information like OTPs, bank passwords, or card details.\\n\\nYour role is to assist, qualify, and book appointments "
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -448,
+        -384
+      ],
+      "id": "1fe36724-7afd-4fc3-8a27-176a11cd129a",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "qCthi7kjA1djA6on",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Lak3YkwdXk3szuxORsotRrqrTY7pqBXbMZsu43N6J2c",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Lak3YkwdXk3szuxORsotRrqrTY7pqBXbMZsu43N6J2c/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Phone number",
+              "lookupValue": "={{ $('Loop Over Items').item.json['Phone number'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -96,
+        -384
+      ],
+      "id": "6d5ac4a2-e8f4-4749-a80c-050946cc8d91",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "IT15dK26vKqnoELe",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "make call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "make call": {
+      "main": [
+        [
+          {
+            "node": "Get call summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get call summary": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Get call summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "838670df-280b-45fa-8120-43e789b50d08",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "44bd69280ca13ea334bbb69cbafc6c32b3b6d0d81de0b4de526805ce87e0ee23"
+  },
+  "id": "l2UXzZwVnLUFuKpW",
+  "tags": []
+}
